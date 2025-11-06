@@ -1,5 +1,5 @@
-import whois
-import requests
+import whois # type: ignore
+import requests # pyright: ignore[reportMissingModuleSource]
 import socket
 
 
@@ -25,3 +25,6 @@ def geolocalizar (dominio):
         "Local" : r.get("city") + ", " + r.get("region") + ", " + r.get("country"),
         "Org" : r.get("org"),
     }
+
+
+input
