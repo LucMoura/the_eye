@@ -5,11 +5,14 @@ command_functions ={
     "crtsh": crtsh.search_crt,
     "dir_enum": dir_enum.directory_enumeration,
     "port_scan": port_scanner.port_scan,
-    "whois": whois_lookup.buscar_whois
+    "whois": whois_lookup.buscar_whois,
+    "geo": whois_lookup.geolocalizar,
 }
 
 def main():
-    parser = argparse.ArgumentParser(description="Network Scanner Tool", epilog="Example: python main.py crtsh example.com")
+    parser = argparse.ArgumentParser(
+        description="Network Scanner Tool",
+        epilog="Example: python main.py crtsh example.com")
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
     
@@ -33,18 +36,39 @@ def main():
 
     args = parser.parse_args()
 
-    if args.command in command_functions:
-        func = command_functions[args.command]
+    if args.command not in command_functions:
+        parser.print_help()
+        return
+
+    func = command_functions[args.command]
+
+    try:
         if args.command == "port_scan":
             results = func(args.target, args.ports)
         elif args.command == "dir_enum":
-            results = func(args.target, args.wordlist)
+                results = func(args.target, args.wordlist)
+        elif args.command in ("whois", "geo"):
+             results = func(args.target)
         else:
-            results = func(args.target)
-        print(f"Results for {args.command}:") if results else print(f"No results found for {args.command}.")
-        [print(result) for result in results] if results else None
-    else:
-        parser.print_help()
+             results = func(args.target)
+
+        print(f"\n=== Resultados de '{args.command}' ===")
+        if not results:
+            print("Nenhum resultado encontrado")
+            return
+
+        if isinstance (results, dict):
+             for key, value in results.items():
+                  print(f"{key}: {value}")
+        elif isinstance(results, list):
+             for item in results:
+                print(item)
+        else:
+             print(results)
+            
+    except Exception as e:
+        print(f"[ERRO] Falha ao executar '{args.command}' : {e}")
+
 
 if __name__ == "__main__":
     main()
